@@ -44,6 +44,7 @@ Now build:
 
 ```
 git build -t egarchive/beacon:2.0 . --no-cache
+cd ../..
 ```
 
 ## Running
