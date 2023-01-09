@@ -1,0 +1,61 @@
+version: "3.7"
+
+services:
+  store:
+    container_name: store
+    image: samply/blaze:develop
+    environment:
+      BASE_URL: "http://store:8080"
+
+  test-data-loader:
+    container_name: test-data-loader
+    image: samply/test-data-loader
+    environment:
+      FHIR_STORE_URL: "http://store:8080/fhir"
+      PATIENT_COUNT: "2000"
+    command: sh -c "sleep 60 && /app/run.sh" # wait for Blaze to start
+
+  transfair:
+    container_name: transfair
+    image: davidcroftdkfz/transfair
+    environment:
+      TF_FHIR_SERVER_SOURCE_ADDRESS: "http://store:8080/fhir"
+      TF_PROFILE: "BBMRI2BEACON"
+      TF_BEACON_PATH: "/srv/transfair"
+    volumes:
+      - ./bff:/srv/transfair
+    restart: on-failure
+    command: sh -c "sleep 180 && java -jar transFAIR.jar" # Wait for test-data-loader
+
+  db-beacon:
+    image: mongo:5
+    hostname: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  db-beacon-load:
+    image: mongo:5
+    volumes:
+      - ./bff:/data
+      - ./images/beacon-2.x-training-ui/db/bff2mongodb_container.sh:/bff2mongodb.sh
+    #command: bash bff2mongodb.sh
+    command:  sh -c "sleep 360 && bash /bff2mongodb.sh" # Wait for transfair
+    #command:  sh -c "sleep 3 && bash /bff2mongodb.sh" # Wait for transfair
+    depends_on:
+      - db-beacon
+
+  beacon:
+    build: ..
+    image: egarchive/beacon:2.0
+    hostname: beacon
+    container_name: beacon
+    volumes:
+      - ./images/beacon2-ri-api/deploy/conf.py:/beacon/beacon/conf.py
+      - ./images/beacon2-ri-api/deploy/logger.yml:/beacon/beacon/logger.yml
+      - ./images/beacon2-ri-api/deploy/ontologies:/beacon/ontologies
+    ports:
+      - "5050:5050"
+    working_dir: '/beacon'
+    entrypoint: ['python','-m','beacon']
+
