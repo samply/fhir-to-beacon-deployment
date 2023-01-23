@@ -14,17 +14,16 @@ This deployment is fully self-contained, but you will need to carry out a few ta
 
 ## Setup
 
-Create working directories:
+Create working directory:
 
 ```
-mkdir bff images
+mkdir images
 ```
 
-Clone relevant repositories from GitHub:
+Clone relevant repository from GitHub:
 
 ```
 cd images
-git clone https://github.com/EGA-archive/beacon-2.x-training-ui.git
 git clone https://github.com/EGA-archive/beacon2-ri-api.git
 ```
 
@@ -43,7 +42,7 @@ database_host = 'mongo'
 Now build:
 
 ```
-git build -t egarchive/beacon:2.0 . --no-cache
+docker build -t egarchive/beacon:2.0 . --no-cache
 cd ../..
 ```
 

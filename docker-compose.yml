@@ -21,9 +21,10 @@ services:
     environment:
       TF_FHIR_SERVER_SOURCE_ADDRESS: "http://store:8080/fhir"
       TF_PROFILE: "BBMRI2BEACON"
-      TF_BEACON_PATH: "/srv/transfair"
+      TF_BEACON_MONGO_USER: "root"
+      TF_BEACON_MONGO_PASS: "example"
     volumes:
-      - ./bff:/srv/transfair
+      - ./bff:/data
     restart: on-failure
     command: sh -c "sleep 180 && java -jar transFAIR.jar" # Wait for test-data-loader
 
@@ -33,17 +34,6 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
-
-  db-beacon-load:
-    image: mongo:5
-    volumes:
-      - ./bff:/data
-      - ./images/beacon-2.x-training-ui/db/bff2mongodb_container.sh:/bff2mongodb.sh
-    #command: bash bff2mongodb.sh
-    command:  sh -c "sleep 360 && bash /bff2mongodb.sh" # Wait for transfair
-    #command:  sh -c "sleep 3 && bash /bff2mongodb.sh" # Wait for transfair
-    depends_on:
-      - db-beacon
 
   beacon:
     build: ..
