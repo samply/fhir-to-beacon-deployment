@@ -17,12 +17,13 @@ services:
 
   transfair:
     container_name: transfair
-    image: davidcroftdkfz/transfair
+    image: samply/transfair
     environment:
       TF_FHIR_SERVER_SOURCE_ADDRESS: "http://store:8080/fhir"
       TF_PROFILE: "BBMRI2BEACON"
       TF_BEACON_MONGO_USER: "root"
       TF_BEACON_MONGO_PASS: "example"
+      TF_TIMER_CRON: "0/59 * * * *"
     volumes:
       - ./bff:/data
     restart: on-failure
